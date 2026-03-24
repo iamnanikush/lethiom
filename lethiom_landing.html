@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lethiom — Proof of Human</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F8F7F4;
+    --ink: #06080D;
+    --blue: #5AB8FF;
+    --mint: #00E8A8;
+    --mid: #00C8FF;
+    --gray: #A8A8A0;
+    --border: rgba(6,8,13,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    font-family: 'Outfit', sans-serif;
+    color: var(--ink);
+    overflow: hidden;
+  }
+
+  /* Subtle grain texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* Full height centered layout */
+  .page {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
+  /* Top nav — minimal */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 10;
+  }
+
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gray);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.8s both;
+  }
+
+  .nav-right {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--gray);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.8s both;
+  }
+
+  /* Hero center */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    text-align: center;
+  }
+
+  /* ── THE LOGO ── */
+  .logo-wrap {
+    opacity: 0;
+    animation: logoReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+  }
+
+  /* ── TAGLINE ── */
+  .tagline {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(16px, 2.2vw, 22px);
+    font-weight: 300;
+    color: var(--ink);
+    letter-spacing: 0.5px;
+    margin-top: 18px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1s both;
+  }
+
+  .tagline em {
+    font-style: normal;
+    font-weight: 400;
+  }
+
+  /* ── SUPPORTING LINE ── */
+  .subline {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(10px, 1.1vw, 12px);
+    color: var(--gray);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.3s both;
+  }
+
+  /* ── BUTTON ── */
+  .btn-wrap {
+    margin-top: 52px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.5s both;
+  }
+
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 36px;
+    border-radius: 100px;
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #5AB8FF20, #00E8A820);
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .cta-btn:hover::before { opacity: 1; }
+  .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(6,8,13,0.2); }
+  .cta-btn:active { transform: translateY(0); }
+
+  .cta-arrow {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--mint));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    transition: transform 0.25s;
+  }
+
+  .cta-btn:hover .cta-arrow { transform: translateX(3px); }
+
+  /* ── BOTTOM FOOTER ── */
+  .footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 2s both;
+  }
+
+  .footer-left {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(6,8,13,0.2);
+    text-transform: uppercase;
+  }
+
+  .footer-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: rgba(6,8,13,0.2);
+  }
+
+  .ledger-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 6px var(--mint);
+    animation: pulse 2s infinite;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6,8,13,0.4);
+    backdrop-filter: blur(8px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: 20px;
+    padding: 48px;
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+    transform: translateY(20px) scale(0.97);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 32px 80px rgba(6,8,13,0.15);
+  }
+
+  .modal-overlay.open .modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    color: var(--gray);
+    transition: background 0.15s;
+  }
+
+  .modal-close:hover { background: #EEECEA; }
+
+  .modal h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .modal p {
+    font-size: 13px;
+    color: var(--gray);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  .modal-field {
+    margin-bottom: 14px;
+  }
+
+  .modal-field label {
+    display: block;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 2px;
+    color: var(--gray);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .modal-field input,
+  .modal-field select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+    appearance: none;
+  }
+
+  .modal-field input:focus,
+  .modal-field select:focus {
+    border-color: var(--blue);
+  }
+
+  .modal-submit {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+
+  .modal-submit:hover { background: #1A1F2E; transform: translateY(-1px); }
+
+  .modal-note {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(168,168,160,0.6);
+    margin-top: 14px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes logoReveal {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 4px var(--mint); }
+    50% { box-shadow: 0 0 10px var(--mint); }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<div class="nav">
+  <div class="nav-logo">Lethiom</div>
+  <div class="nav-right">lethiom.com</div>
+</div>
+
+<!-- Page -->
+<div class="page">
+  <div class="hero">
+
+    <!-- LOGO -->
+    <div class="logo-wrap">
+      <canvas id="logoCanvas" style="display:block; max-width:100%;"></canvas>
+    </div>
+
+    <!-- TAGLINE -->
+    <div class="tagline">Proof of Human.</div>
+
+    <!-- SUBLINE -->
+    <div class="subline">Ledger of Truth</div>
+
+    <!-- CTA BUTTON -->
+    <div class="btn-wrap">
+      <button class="cta-btn" onclick="openModal()">
+        Request Early Access
+        <div class="cta-arrow">→</div>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <div class="footer-left">© 2026 Lethiom</div>
+  <div class="footer-right">
+    <div class="ledger-dot"></div>
+    Ledger Live
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2>Request Early Access</h2>
+    <p>We are working with a select group of employers and investors. Tell us about yourself and we will be in touch.</p>
+
+    <div class="modal-field">
+      <label>Full Name</label>
+      <input type="text" placeholder="Alex Rivera"/>
+    </div>
+    <div class="modal-field">
+      <label>Email</label>
+      <input type="email" placeholder="alex@company.com"/>
+    </div>
+    <div class="modal-field">
+      <label>I am a</label>
+      <select>
+        <option value="">Select one</option>
+        <option>Angel Investor</option>
+        <option>Employer / Hiring Manager</option>
+        <option>Candidate</option>
+        <option>Strategic Partner</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Company</label>
+      <input type="text" placeholder="Company name"/>
+    </div>
+
+    <button class="modal-submit" onclick="handleSubmit()">Submit Request</button>
+    <div class="modal-note">We respond within 24 hours.</div>
+  </div>
+</div>
+
+<script>
+  // ── ANIMATED CANVAS LOGO ──
+  // LETHIO fades in first, then the M strokes draw themselves
+  // like a signature, mirror fades in, dot pulses in last.
+
+  let animState = {};
+
+  function setupLogo() {
+    const canvas = document.getElementById('logoCanvas');
+    const dpr = window.devicePixelRatio || 1;
+    const fontSize = Math.min(window.innerWidth * 0.12, 96);
+    const font = `900 ${fontSize}px 'Outfit', sans-serif`;
+
+    const tempCtx = document.createElement('canvas').getContext('2d');
+    tempCtx.font = font;
+    const fullWidth = tempCtx.measureText('LETHIOM').width;
+    const withoutM = tempCtx.measureText('LETHIO').width;
+    const mWidth = fullWidth - withoutM;
+
+    const padding = fontSize * 0.15;
+    const W = fullWidth + padding * 2;
+    const H = fontSize * 1.4;
+    const baseline = fontSize * 1.05;
+
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const mX = padding + withoutM;
+    const mRight = mX + mWidth;
+    const mMid = mX + mWidth / 2;
+    const top = baseline - fontSize * 0.88;
+    const peak = baseline - fontSize * 0.42;
+    const mirrorDepth = baseline + fontSize * 0.15;
+    const mirrorPeak = baseline + fontSize * 0.07;
+    const sw = fontSize * 0.088;
+
+    // Build the top M path points for stroke animation
+    // Path: bottom-left → top-left → peak → top-right → bottom-right
+    const topMPoints = [
+      [mX, baseline],
+      [mX, top],
+      [mMid, peak],
+      [mRight, top],
+      [mRight, baseline]
+    ];
+
+    const mirrorPoints = [
+      [mX, baseline],
+      [mX, mirrorDepth],
+      [mMid, mirrorPeak],
+      [mRight, mirrorDepth],
+      [mRight, baseline]
+    ];
+
+    // Compute total path length for top M
+    function pathLength(pts) {
+      let len = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const dx = pts[i][0] - pts[i-1][0];
+        const dy = pts[i][1] - pts[i-1][1];
+        len += Math.sqrt(dx*dx + dy*dy);
+      }
+      return len;
+    }
+
+    const totalLen = pathLength(topMPoints);
+
+    animState = { ctx, font, padding, baseline, W, H, fontSize,
+      mX, mRight, mMid, top, peak, mirrorDepth, mirrorPeak, sw,
+      topMPoints, mirrorPoints, totalLen,
+      textAlpha: 0, drawProgress: 0, mirrorAlpha: 0, dotScale: 0,
+      phase: 'text', startTime: null };
+
+    requestAnimationFrame(animateLogo);
+  }
+
+  function animateLogo(ts) {
+    const s = animState;
+    if (!s.startTime) s.startTime = ts;
+    const elapsed = ts - s.startTime;
+
+    const ctx = s.ctx;
+    ctx.clearRect(0, 0, s.W, s.H);
+
+    // Easing
+    const ease = t => t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+    // Phase timings (ms)
+    const T_TEXT_IN    = 400;   // LETHIO fades in
+    const T_DRAW_START = 500;   // M starts drawing
+    const T_DRAW_END   = 1100;  // M finishes drawing
+    const T_MIRROR_IN  = 1000;  // mirror starts fading
+    const T_MIRROR_END = 1400;  // mirror done
+    const T_DOT_IN     = 1200;  // dot pulses in
+    const T_DOT_END    = 1600;  // dot settled
+
+    const textAlpha   = ease(clamp((elapsed) / T_TEXT_IN, 0, 1));
+    const drawProg    = ease(clamp((elapsed - T_DRAW_START) / (T_DRAW_END - T_DRAW_START), 0, 1));
+    const mirrorAlpha = ease(clamp((elapsed - T_MIRROR_IN) / (T_MIRROR_END - T_MIRROR_IN), 0, 1)) * 0.38;
+    const dotScale    = ease(clamp((elapsed - T_DOT_IN) / (T_DOT_END - T_DOT_IN), 0, 1));
+
+    // ── Draw LETHIO ──
+    ctx.save();
+    ctx.globalAlpha = textAlpha;
+    ctx.font = s.font;
+    ctx.fillStyle = '#06080D';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('LETHIO', s.padding, s.baseline);
+    ctx.restore();
+
+    // Gradients
+    const gradTop = ctx.createLinearGradient(s.mMid, s.top, s.mMid, s.baseline);
+    gradTop.addColorStop(0, '#6BBFFF');
+    gradTop.addColorStop(0.5, '#00C8FF');
+    gradTop.addColorStop(1, '#00E8A8');
+
+    const gradBot = ctx.createLinearGradient(s.mMid, s.baseline, s.mMid, s.mirrorDepth);
+    gradBot.addColorStop(0, '#00E8A8');
+    gradBot.addColorStop(1, '#6BBFFF');
+
+    // ── Draw top M (animated stroke-dashoffset style) ──
+    if (drawProg > 0) {
+      const targetLen = drawProg * s.totalLen;
+      let remaining = targetLen;
+      const pts = s.topMPoints;
+
+      ctx.save();
+      ctx.shadowColor = '#00C8FF';
+      ctx.shadowBlur = s.fontSize * 0.12;
+      ctx.strokeStyle = gradTop;
+      ctx.lineWidth = s.sw;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+
+      for (let i = 1; i < pts.length; i++) {
+        const dx = pts[i][0] - pts[i-1][0];
+        const dy = pts[i][1] - pts[i-1][1];
+        const segLen = Math.sqrt(dx*dx + dy*dy);
+
+        if (remaining <= 0) break;
+
+        if (remaining >= segLen) {
+          ctx.lineTo(pts[i][0], pts[i][1]);
+          remaining -= segLen;
+        } else {
+          const t = remaining / segLen;
+          ctx.lineTo(pts[i-1][0] + dx*t, pts[i-1][1] + dy*t);
+          remaining = 0;
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ── Mirror M ──
+    if (mirrorAlpha > 0) {
+      const mp = s.mirrorPoints;
+      ctx.save();
+      ctx.globalAlpha = mirrorAlpha;
+      ctx.strokeStyle = gradBot;
+      ctx.lineWidth = s.sw * 0.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(mp[0][0], mp[0][1]);
+      for (let i = 1; i < mp.length; i++) ctx.lineTo(mp[i][0], mp[i][1]);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ── Axis dot ──
+    if (dotScale > 0) {
+      ctx.save();
+      ctx.shadowColor = '#00C8FF';
+      ctx.shadowBlur = s.fontSize * 0.12;
+      const r = s.sw * 0.65 * dotScale;
+      const dotGrad = ctx.createRadialGradient(s.mMid, s.baseline, 0, s.mMid, s.baseline, r);
+      dotGrad.addColorStop(0, '#00E8A8');
+      dotGrad.addColorStop(1, '#5AB8FF');
+      ctx.beginPath();
+      ctx.arc(s.mMid, s.baseline, r, 0, Math.PI * 2);
+      ctx.fillStyle = dotGrad;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Keep animating until all phases complete
+    if (elapsed < T_DOT_END + 200) {
+      requestAnimationFrame(animateLogo);
+    }
+  }
+
+  document.fonts.ready.then(() => {
+    setupLogo();
+  });
+
+  window.addEventListener('resize', () => {
+    document.fonts.ready.then(() => setupLogo());
+  });
+
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  function handleSubmit() {
+    const btn = document.querySelector('.modal-submit');
+    btn.textContent = '✓ Request Received';
+    btn.style.background = '#2A5C45';
+    setTimeout(closeModal, 1800);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+
+</body>
+</html>
